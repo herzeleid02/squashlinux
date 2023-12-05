@@ -19,10 +19,11 @@ build-iso
 + patcher should be in isobuild program and it should delete the temporary live copies and initrd
 
 
-## pull (uses podman for saving tars)
+## pull (uses podman for saving tars) (or export)
 ```
 --image, -i
 --no-copy-id (dont copy id)
+--quiet, -q 
 ```
 
 ## bootstrap (deprecate it, meh)
