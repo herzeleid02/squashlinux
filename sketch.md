@@ -1,4 +1,4 @@
-#squashlinux (sfslinux)
+# squashlinux (sfslinux)
 
 + bootstrap (regular bootstrap from additional scripts) (deprecated and superseded by pull)
 + pull (pull the tar from podman and unpack it... more choice for distros)
