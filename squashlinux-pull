@@ -2,7 +2,7 @@
 ## https://github.com/herzeleid02/squashlinux
 # some of the code was stolen from distrobox-create :)
 
-#!/bin/bash # i think u can run this in any posix compatible shell
+#!/bin/bash -x # i think u can run this in any posix compatible shell
 
 version="0.1"
 verbose=0
@@ -14,6 +14,12 @@ flush=0 # it should not remove any already pulled images
 chroot_directory=""
 
 # parsing args
+
+function show_help(){
+	cat << EOF
+hello world
+EOF
+}
 
 while :; do
 	case $1 in
@@ -76,17 +82,14 @@ if [ "${verbose}" -ne 0 ]; then
 	set -o xtrace
 fi
 
-function show_help(){
-	cat << EOF
-hello world
-EOF
-}
 
 # the program (aka the main function)
 
 # test if directory exists
 
-if [ ! -d "$chroot_directory" ]; then
+echo "
+
+if [ ! -d "$chroot_directory" ] || [ -z ${container_image} ] && [ -z ${chroot_directory} ] then
 	show_help	
 	exit 1;
 fi
