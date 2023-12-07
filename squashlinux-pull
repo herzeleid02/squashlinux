@@ -6,7 +6,6 @@
 set -o posix #kek
 # this script should run as root because of the perms 
 
-
 version="0.1"
 verbose=0
 verbose_key=""
@@ -22,6 +21,7 @@ function main(){
 	echo ${container_image} # debug
 	echo ${chroot_directory} # debug
 	check_args # actually i should merge them (maybe)
+	check_privileges
 	podman_main
 }
 
@@ -67,6 +67,7 @@ function parse_args(){
 				;;
 			--rootless) ## function to create rootless bootstraps (pls dont)
 				rootless=1
+				shift
 				;;
 			--) # End of all options.
 				shift
@@ -100,7 +101,7 @@ EOF
 }
 
 function check_args(){
-	if [ -z ${container_image} ] || [ -z ${chroot_directory} ]; then
+	if [ -z ${container_image} ] || [ ! -d ${chroot_directory} ]; then
 		show_help
 		exit 1
 	fi
@@ -114,7 +115,6 @@ function check_privileges() {
 }
 
 function podman_main(){
-	
 	# check if image exists, if it does, dont flush
 	if podman image exists ${container_image}; then
 		echo "SNEEEEED" # debug
@@ -123,10 +123,13 @@ function podman_main(){
 
 	if ! podman image exists ${container_image}; then
 		podman pull ${container_image}
-	fi	
+	else	
+		echo "container image exists locally, not touching it" # TODO: change this line
+	fi
 
-	## there should the the tar pipe 
-	podman save ${container_image} | tar ${verbose_key} -xpf - -O | tar ${verbose_key} -xpf - -C ${chroot_directory} # no cleanup? kek
+	## there should the the tar pipe (that oneliner is cap frfr)
+	podman save ${container_image} | tar ${verbose_key} --overwrite -xpf - -O | tar ${verbose_key} --overwrite -xpf - -C ${chroot_directory} # no cleanup? kek 
+	# should overwrite be default? i think so
 
 	echo $flush # debug
 
@@ -134,7 +137,6 @@ function podman_main(){
 		echo "removing the image" # debug (maybe output, idk)
 		podman image rm ${container_image}
 	fi
-
 }
 
 main "$@" # bash moment
