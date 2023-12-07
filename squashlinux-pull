@@ -22,7 +22,6 @@ function main(){
 	echo ${container_image} # debug
 	echo ${chroot_directory} # debug
 	check_args # actually i should merge them (maybe)
-	init_verbose
 	podman_main
 }
 
@@ -37,6 +36,7 @@ function parse_args(){
 			-v | --verbose)
 				verbose=1
 				verbose_key="-v"
+				set -o xtrace
 				shift
 				;;
 			-V | --version)
@@ -105,13 +105,6 @@ function check_args(){
 		exit 1
 	fi
 }
-
-function init_verbose(){
-	if [ "${verbose}" -ne 0 ]; then
-		set -o xtrace
-	fi
-}
-
 
 function check_privileges() {
 	if [ "$EUID" -ne 0 ] && [ ${rootless} -eq 0 ]; then
