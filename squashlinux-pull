@@ -125,7 +125,7 @@ function check_privileges() {
 function podman_main(){
 	# check if image exists, if it does, dont flush
 	if podman image exists ${container_image}; then
-		echo "container image exists locally, not touching it" # TODO: change this line
+		echo "container image exists locally, not removing it" # TODO: change this line
 		flush=0
 	fi
 
@@ -135,7 +135,8 @@ function podman_main(){
 
 	## there should the the tar pipe (that oneliner is cap frfr)
 	# check if chroot dir isnt empty
-	if find ${chroot_directory}/ -maxdepth 0 -empty && [ ${overwrite} -eq 0 ]; then
+	# TODO: replace find
+	if find ${chroot_directory}/ -maxdepth 0 -empty 1>/dev/null && [ ${overwrite} -eq 0 ]; then
 		echo "${chroot_directory} contains files, aborting..."
 		echo "You may use --force option, but it is not recommended"
 		exit 1
