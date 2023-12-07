@@ -5,6 +5,9 @@
 ## TODO: output when extracting image1
 ## TODO: check order of checking dir and pulling (its kinda ok)
 ## TODO: fix checking of the dir
+## TODO: add more eye-candy output
+## TODO: add mkdir command
+## TODO: check the verbose_key appearance in all program invokactions
 
 #!/bin/bash # i think u can run this in any posix compatible shell
 set -o posix #kek
