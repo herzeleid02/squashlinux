@@ -36,7 +36,7 @@ function parse_args(){
 				;;
 			-v | --verbose)
 				verbose=1
-				#verbose_key="s
+				verbose_key="-v"
 				shift
 				;;
 			-V | --version)
@@ -50,7 +50,7 @@ function parse_args(){
 					shift
 				fi
 				;;
-			-F | --flush) # function to then remove the image from the host (default behaivour)
+			-F | --flush) # function to then remove the image from the host (default behaivour) (i should probably remove it -- it wont force remove podman) (should the program do it? i dont think so)
 				flush=1
 				shift
 				;;
@@ -133,7 +133,7 @@ function podman_main(){
 	fi	
 
 	## there should the the tar pipe 
-#	podman save debian:unstable | tar -xpf - -O | tar -xpvf -
+	podman save ${container_image} | tar ${verbose_key} -xpf - -O | tar ${verbose_key} -xpf - -C ${chroot_directory} # no cleanup? kek
 
 	echo $flush # debug
 

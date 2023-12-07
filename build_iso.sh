@@ -1,6 +1,7 @@
 ## This program is a part of a bigger project
 ## https://github.com/herzeleid02/squashlinux
 
+# TODO: shorten the v_keya creation (just set it in main)
 # TODO: create
 # TODO: better error handler with output
 
