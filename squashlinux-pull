@@ -15,6 +15,8 @@ tmp_dir="/tmp/tar-$(date +%d%m%Y)-$(tr -dc a-z </dev/urandom | head -c 4)" # act
 flush=1 # it should not remove any already pulled images
 chroot_directory=""
 rootless=0
+overwrite=0
+overwrite_key=""
 
 function main(){
 	parse_args "$@"
@@ -50,7 +52,7 @@ function parse_args(){
 					shift
 				fi
 				;;
-			-F | --flush) # function to then remove the image from the host (default behaivour) (i should probably remove it -- it wont force remove podman) (should the program do it? i dont think so)
+			--flush) # function to then remove the image from the host (default behaivour) (i should probably remove it -- it wont force remove podman) (should the program do it? i dont think so)
 				flush=1
 				shift
 				;;
@@ -67,6 +69,11 @@ function parse_args(){
 				;;
 			--rootless) ## function to create rootless bootstraps (pls dont)
 				rootless=1
+				shift
+				;;
+			-F | --force) ## delete the dir inside
+				overwrite=1
+				overwrite_key="--overwrite"
 				shift
 				;;
 			--) # End of all options.
@@ -105,6 +112,7 @@ function check_args(){
 		show_help
 		exit 1
 	fi
+	chroot_directory=$(realpath ${chroot_directory})
 }
 
 function check_privileges() {
@@ -128,7 +136,14 @@ function podman_main(){
 	fi
 
 	## there should the the tar pipe (that oneliner is cap frfr)
-	podman save ${container_image} | tar ${verbose_key} --overwrite -xpf - -O | tar ${verbose_key} --overwrite -xpf - -C ${chroot_directory} # no cleanup? kek 
+	# check if chroot dir isnt empty
+	if find ${chroot_directory}/ -maxdepth 0 -empty && [ ${overwrite} -eq 0 ]; then
+		echo "${chroot_directory} contains files, aborting..."
+		echo "You may use --force option, but it is not recommended"
+		exit 1
+	fi
+
+	podman save ${container_image} | tar ${verbose_key} ${overwrite_key} -xpf - -O | tar ${verbose_key} ${overwrite_key} -xpf - -C ${chroot_directory} # no cleanup? kek 
 	# should overwrite be default? i think so
 
 	echo $flush # debug
