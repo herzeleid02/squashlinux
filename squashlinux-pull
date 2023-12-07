@@ -78,11 +78,14 @@ function parse_args(){
 				exit 1
 				;;
 			*) # Default case: If no more options then break out of the loop.
-				#if [ -n "$1" ]; then
 					container_image="$1"
 					chroot_directory="$2"
+					if [ ! -z "$3" ]; then
+						echo "dont use third arg" # debug
+						show_help
+						exit 1
+					fi
 					shift
-				#else
 					break
 				#fi
 				;;
@@ -119,17 +122,18 @@ function check_privileges() {
 
 function podman_main(){
 	
-#	podman save debian:unstable | tar -xpf - -O | tar -xpvf -
 	# check if image exists, if it does, dont flush
-	if [ $(podman image exists ${container_image}) ]; then
+	if podman image exists ${container_image}; then
+		echo "SNEEEEED" # debug
 		flush=0
 	fi
 
-	if [ ! $(podman image exists ${container_image}) ]; then
+	if ! podman image exists ${container_image}; then
 		podman pull ${container_image}
 	fi	
 
 	## there should the the tar pipe 
+#	podman save debian:unstable | tar -xpf - -O | tar -xpvf -
 
 	echo $flush # debug
 
@@ -137,8 +141,6 @@ function podman_main(){
 		echo "removing the image" # debug (maybe output, idk)
 		podman image rm ${container_image}
 	fi
-
-
 
 }
 
