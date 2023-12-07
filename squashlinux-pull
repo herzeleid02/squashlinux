@@ -128,7 +128,7 @@ function podman_main(){
 	fi
 
 	## there should the the tar pipe (that oneliner is cap frfr)
-	podman save ${container_image} | tar ${verbose_key} --overwrite -xpf - -O | tar ${verbose_key} --overwrite -xpf - -C ${chroot_directory} # no cleanup? kek 
+	podman save ${container_image} | tar ${verbose_key} -U --overwrite -xpf - -O | tar ${verbose_key} -U --overwrite -xpf - -C ${chroot_directory} # no cleanup? kek 
 	# should overwrite be default? i think so
 
 	echo $flush # debug
