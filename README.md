@@ -23,6 +23,10 @@ Utility for pulling and extracting an OCI container (using `podman pull` and `ta
 ## DIY
 <!-- (info about squashlinux-pull, but manual) -->
 
+## TODO:
+[ ] chroot basic setup tool
+[ ] initrd building tool
+
 ## Dependencies
 + podman (for OS image pulling)
 + mksquashfs
