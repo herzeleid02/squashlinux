@@ -1,0 +1,155 @@
+## This program is a part of a bigger project
+## https://github.com/herzeleid02/squashlinux
+## some of the code was stolen from distrobox-create :)
+
+#!/bin/bash -x # i think u can run this in any posix compatible shell
+set -o posix #kek
+# this script should run as root because of the perms 
+
+version="0.1"
+verbose=0
+verbose_key=""
+dryrun=0 ##why
+container_image=""
+tmp_dir="/tmp/tar-$(date +%d%m%Y)-$(tr -dc a-z </dev/urandom | head -c 4)" # actually not neccessary
+flush=1 # it should not remove any already pulled images
+chroot_directory=""
+rootless=0
+overwrite=0
+overwrite_key=""
+
+function main(){
+	parse_args "$@"
+#	echo ${container_image} # debug
+#	echo ${chroot_directory} # debug
+	check_args # actually i should merge them (maybe)
+	check_privileges
+	podman_main
+}
+
+function parse_args(){
+	while :; do
+		case $1 in
+			-h | --help)
+				# Call a "show_help" function to display a synopsis, then exit.
+				show_help
+				exit 0
+				;;
+			-v | --verbose)
+				verbose=1
+				verbose_key="-v"
+				set -o xtrace
+				shift
+				;;
+			-V | --version)
+				printf "Version: %s\n" "${version}" # to be changed # TODO: change it
+				exit 0
+				;;
+			-i | --image)
+				if [ -n "$2" ]; then
+					container_image="$2"
+					shift
+					shift
+				fi
+				;;
+			--flush) # function to then remove the image from the host (default behaivour) (i should probably remove it -- it wont force remove podman) (should the program do it? i dont think so)
+				flush=1
+				shift
+				;;
+			--no-flush) ## disable image flushing
+				flush=0
+				shift
+				;;
+			-t | --target-directory)
+				if [ -n "$2" ]; then
+					chroot_directory="$2"
+					shift
+					shift
+				fi
+				;;
+			--rootless) ## function to create rootless bootstraps (pls dont)
+				rootless=1
+				shift
+				;;
+			-F | --force) ## delete the dir inside
+				overwrite=1
+				overwrite_key="--overwrite"
+				shift
+				;;
+			--) # End of all options.
+				shift
+				break
+				;;
+			-*) # Invalid options.
+				printf >&2 "ERROR: Invalid flag '%s'\n\n" "$1"
+				show_help
+				exit 1
+				;;
+			*) # Default case: If no more options then break out of the loop.
+					container_image="$1"
+					chroot_directory="$2"
+					if [ ! -z "$3" ]; then
+						echo "dont use third arg" # debug
+						show_help
+						exit 1
+					fi
+					shift
+					break
+				#fi
+				;;
+		esac
+	done
+}
+
+function show_help(){
+	cat << EOF
+hello world
+EOF
+}
+
+function check_args(){
+	if [ -z ${container_image} ] || [ ! -d ${chroot_directory} ]; then
+		show_help
+		exit 1
+	fi
+	chroot_directory=$(realpath ${chroot_directory})
+}
+
+function check_privileges() {
+	if [ "$EUID" -ne 0 ] && [ ${rootless} -eq 0 ]; then
+	echo "Please run as root or use --rootless option (not recommended)"
+  	exit 1;
+	fi
+}
+
+function podman_main(){
+	# check if image exists, if it does, dont flush
+	if podman image exists ${container_image}; then
+		echo "container image exists locally, not touching it" # TODO: change this line
+		flush=0
+	fi
+
+	if ! podman image exists ${container_image}; then
+		podman pull ${container_image}
+	fi
+
+	## there should the the tar pipe (that oneliner is cap frfr)
+	# check if chroot dir isnt empty
+	if find ${chroot_directory}/ -maxdepth 0 -empty && [ ${overwrite} -eq 0 ]; then
+		echo "${chroot_directory} contains files, aborting..."
+		echo "You may use --force option, but it is not recommended"
+		exit 1
+	fi
+
+	podman save ${container_image} | tar ${verbose_key} ${overwrite_key} -xpf - -O | tar ${verbose_key} ${overwrite_key} -xpf - -C ${chroot_directory} # no cleanup? kek 
+	# should overwrite be default? i think so
+
+	#echo $flush # debug
+
+	if [ ${flush} -eq 1 ]; then
+		echo "removing the image" # debug (maybe output, idk)
+		podman image rm ${container_image}
+	fi
+}
+
+main "$@" # bash moment
