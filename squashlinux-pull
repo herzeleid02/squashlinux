@@ -2,7 +2,7 @@
 ## https://github.com/herzeleid02/squashlinux
 ## some of the code was stolen from distrobox-create :)
 
-#!/bin/bash -x # i think u can run this in any posix compatible shell
+#!/bin/bash # i think u can run this in any posix compatible shell
 set -o posix #kek
 # this script should run as root because of the perms 
 
@@ -86,16 +86,17 @@ function parse_args(){
 				exit 1
 				;;
 			*) # Default case: If no more options then break out of the loop.
+				if [ -n "$1" ]; then
 					container_image="$1"
 					chroot_directory="$2"
+					shift
 					if [ ! -z "$3" ]; then
 						echo "dont use third arg" # debug
 						show_help
 						exit 1
 					fi
-					shift
 					break
-				#fi
+				fi
 				;;
 		esac
 	done
@@ -136,7 +137,7 @@ function podman_main(){
 	## there should the the tar pipe (that oneliner is cap frfr)
 	# check if chroot dir isnt empty
 	# TODO: replace find
-	if find ${chroot_directory}/ -maxdepth 0 -empty 1>/dev/null && [ ${overwrite} -eq 0 ]; then
+	if find ${chroot_directory}/ -maxdepth 0 -empty && [ ${overwrite} -eq 0 ]; then
 		echo "${chroot_directory} contains files, aborting..."
 		echo "You may use --force option, but it is not recommended"
 		exit 1
