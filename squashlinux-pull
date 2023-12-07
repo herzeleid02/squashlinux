@@ -20,8 +20,8 @@ overwrite_key=""
 
 function main(){
 	parse_args "$@"
-	echo ${container_image} # debug
-	echo ${chroot_directory} # debug
+#	echo ${container_image} # debug
+#	echo ${chroot_directory} # debug
 	check_args # actually i should merge them (maybe)
 	check_privileges
 	podman_main
@@ -125,14 +125,12 @@ function check_privileges() {
 function podman_main(){
 	# check if image exists, if it does, dont flush
 	if podman image exists ${container_image}; then
-		echo "SNEEEEED" # debug
+		echo "container image exists locally, not touching it" # TODO: change this line
 		flush=0
 	fi
 
 	if ! podman image exists ${container_image}; then
 		podman pull ${container_image}
-	else	
-		echo "container image exists locally, not touching it" # TODO: change this line
 	fi
 
 	## there should the the tar pipe (that oneliner is cap frfr)
@@ -146,7 +144,7 @@ function podman_main(){
 	podman save ${container_image} | tar ${verbose_key} ${overwrite_key} -xpf - -O | tar ${verbose_key} ${overwrite_key} -xpf - -C ${chroot_directory} # no cleanup? kek 
 	# should overwrite be default? i think so
 
-	echo $flush # debug
+	#echo $flush # debug
 
 	if [ ${flush} -eq 1 ]; then
 		echo "removing the image" # debug (maybe output, idk)
