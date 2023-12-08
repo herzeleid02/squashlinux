@@ -4,6 +4,7 @@
 # TODO: shorten the v_keya creation (just set it in main)
 # TODO: create
 # TODO: better error handler with output
+# TODO: fix comp option (or disable it, lol)
 
 #!/bin/bash
 
