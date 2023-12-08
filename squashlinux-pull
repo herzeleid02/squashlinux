@@ -28,8 +28,8 @@ overwrite_key=""
 
 function main(){
 	parse_args "$@"
-#	echo ${container_image} # debug
-#	echo ${chroot_directory} # debug
+ #	echo ${container_image} # debug
+ #	echo ${chroot_directory} # debug
 	check_args # actually i should merge them (maybe)
 	check_privileges
 	podman_main
@@ -79,7 +79,7 @@ function parse_args(){
 				rootless=1
 				shift
 				;;
-			-F | --force) ## delete the dir inside
+			--overwrite) ## overwrite
 				overwrite=1
 				overwrite_key="--overwrite"
 				shift
@@ -117,7 +117,15 @@ EOF
 }
 
 function check_args(){
-	if [ -z ${container_image} ] || [ ! -d ${chroot_directory} ]; then
+#	echo "sneed" # debug
+#	echo ${container_image} # debug
+#	echo ${chroot_directory} # debug
+	if [ -z ${container_image} ]; then
+		show_help
+		exit 1
+	fi
+	# dirty, dirty if
+	if [ ! -d ${chroot_directory} ] || [ -z ${chroot_directory} ]; then
 		show_help
 		exit 1
 	fi
@@ -146,9 +154,9 @@ function podman_main(){
 	# check if chroot dir isnt empty
 	# TODO: replace find
 	#if find ${chroot_directory}/ -maxdepth 0 -empty && [ ${overwrite} -eq 0 ]; then
-	if [ -z "$(ls -A ${chroot_directory})" ] && [ ${overwrite} -eq 0]; then
+	if [ ! -z "$(ls -A ${chroot_directory})" ] && [ ${overwrite} -eq 0 ]; then
 		echo "${chroot_directory} contains files, aborting..."
-		echo "You may use --force option, but it is not recommended"
+		echo "You may use --overwrite option, but it is not recommended"
 		exit 1
 	fi
 
