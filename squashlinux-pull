@@ -97,14 +97,15 @@ function parse_args(){
 				if [ -n "$1" ]; then
 					container_image="$1"
 					chroot_directory="$2"
-					shift
 					if [ ! -z "$3" ]; then
 						echo "dont use third arg" # debug
 						show_help
 						exit 1
 					fi
 					break
+					#shift
 				fi
+				break
 				;;
 		esac
 	done
