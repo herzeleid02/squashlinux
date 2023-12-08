@@ -8,6 +8,7 @@
 ## TODO: add more eye-candy output
 ## TODO: add mkdir command
 ## TODO: check the verbose_key appearance in all program invokactions
+## TODO: help output
 
 #!/bin/bash # i think u can run this in any posix compatible shell
 set -o posix #kek
@@ -144,12 +145,14 @@ function podman_main(){
 	## there should the the tar pipe (that oneliner is cap frfr)
 	# check if chroot dir isnt empty
 	# TODO: replace find
-	if find ${chroot_directory}/ -maxdepth 0 -empty && [ ${overwrite} -eq 0 ]; then
+	#if find ${chroot_directory}/ -maxdepth 0 -empty && [ ${overwrite} -eq 0 ]; then
+	if [ -z "$(ls -A ${chroot_directory})" ] && [ ${overwrite} -eq 0]; then
 		echo "${chroot_directory} contains files, aborting..."
 		echo "You may use --force option, but it is not recommended"
 		exit 1
 	fi
 
+	echo "Unpacking the image..."
 	podman save ${container_image} | tar ${verbose_key} ${overwrite_key} -xpf - -O | tar ${verbose_key} ${overwrite_key} -xpf - -C ${chroot_directory} # no cleanup? kek 
 	# should overwrite be default? i think so
 
