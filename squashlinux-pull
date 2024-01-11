@@ -2,6 +2,8 @@
 ## https://github.com/herzeleid02/squashlinux
 ## some of the code was stolen from distrobox-create :)
 
+## TODO: podman export instead of podman save
+
 ## TODO: output when extracting image1
 ## TODO: check order of checking dir and pulling (its kinda ok)
 ## TODO: fix checking of the dir
