@@ -21,7 +21,7 @@ verbose=0
 verbose_key=""
 dryrun=0 ##why
 container_image=""
-tmp_dir="/tmp/tar-$(date +%d%m%Y)-$(tr -dc a-z </dev/urandom | head -c 4)" # actually not neccessary
+tmp_name="pull-$(date +%d%m%Y)-$(tr -dc a-z </dev/urandom | head -c 4)" # actually not neccessary
 flush=1 # it should not remove any already pulled images
 chroot_directory=""
 rootless=0
@@ -164,7 +164,11 @@ function podman_main(){
 	fi
 
 	echo "Unpacking the image..."
-	podman save ${container_image} | tar ${verbose_key} ${overwrite_key} -xpf - -O | tar ${verbose_key} ${overwrite_key} -xpf - -C ${chroot_directory} # no cleanup? kek 
+	#podman save ${container_image} | tar ${verbose_key} ${overwrite_key} -xpf - -O | tar ${verbose_key} ${overwrite_key} -xpf - -C ${chroot_directory} # no cleanup? kek 
+
+	podman run -d --name ${tmp_name} ${container_image} && podman export ${tmp_name} | tar -xf - -C ${chroot_directory}
+	podman rm --force ${tmp_name}
+
 	# should overwrite be default? i think so
 
 	#echo $flush # debug
