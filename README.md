@@ -10,6 +10,13 @@ Most of the utilities here can be used independently as well as a part of a bigg
 ### squashlinux-pull
 Utility for pulling and extracting an OCI container (using `podman pull` and `tar`) into a chrootable directory. More versatile and portable than distro-specific bootstap utilities. Also supports experimental `--rootless` option for those who need it (not my buisness).
 
+## Notes
+### Building an .iso without using extra space with podman and exported tarballs
+1. Create a podman container
+2. Edit the container environemnt however you want (set the users, install all the necessary software)
+3. Use `podman mount`
+4. Use the printed out directory as an argument for `build_iso.sh`
+
 
 ## Installation
 
