@@ -1,6 +1,7 @@
 ## This program is a part of a bigger project
 ## https://github.com/herzeleid02/squashlinux
 
+# TODO: cp change to handle symlinks
 # TODO: shorten the v_keya creation (just set it in main)
 # TODO: create
 # TODO: better error handler with output
@@ -21,8 +22,8 @@ comp_level="" # not implemented yet
 comp_command="" #
 grub_make_command="grub-mkstandalone" # can also be "grub2_mkstandalone"
 
-trap "failure_cleanup" 1 2 3 6
-trap "failure_cleanup" ERR
+#trap "failure_cleanup" 1 2 3 6 # disabled
+#trap "failure_cleanup" ERR # disabled
 
 function main(){
 	while getopts "hvd:o:c:" option; do
@@ -64,7 +65,7 @@ function main(){
 		make_iso &> /dev/null
 	fi
 	
-	make_cleanup
+	#make_cleanup # disabled
 
 }
 
@@ -171,6 +172,7 @@ function check_grub_make_command(){
 # the master nested function -- look below
 function make_iso(){
 	make_hierarchy
+	fedorapatch
 	make_squashfs
 	copy_kernel
 	boot_menu_grub
@@ -212,6 +214,12 @@ function copy_kernel(){
 		"${build_root}/staging/live/" && \
 	cp ${v_keya} "${build_root}/chroot/boot"/initrd* \
 	"${build_root}/staging/live/"
+}
+
+function fedorapatch(){ # function to symlink the image
+	echo "sneed" # placeholder
+	mkdir ${v_keya} "${build_root}/staging/LiveOS"
+	ln -s ${v_keya} "${build_root}/staging/live/filesystem.squashfs" "${build_root}/staging/LiveOS/squashfs.img"
 }
 
 function boot_menu_grub(){
