@@ -7,6 +7,8 @@
 # TODO: better error handler with output
 # TODO: fix comp option (or disable it, lol)
 
+# TODO: fedorapatch -- mv\cp\ln the files (vmlinuz, initramfs)
+
 #!/bin/bash
 
 set -o errtrace
@@ -172,8 +174,8 @@ function check_grub_make_command(){
 # the master nested function -- look below
 function make_iso(){
 	make_hierarchy
-	fedorapatch
 	make_squashfs
+	fedorapatch
 	copy_kernel
 	boot_menu_grub
 	boot_install_grub
@@ -219,7 +221,9 @@ function copy_kernel(){
 function fedorapatch(){ # function to symlink the image
 	echo "sneed" # placeholder
 	mkdir ${v_keya} "${build_root}/staging/LiveOS"
-	ln -s ${v_keya} "${build_root}/staging/live/filesystem.squashfs" "${build_root}/staging/LiveOS/squashfs.img"
+	#ln -s ${v_keya} "${build_root}/staging/live/filesystem.squashfs" "${build_root}/staging/LiveOS/squashfs.img"
+	cp ${v_keya} "${build_root}/staging/live/filesystem.squashfs" "${build_root}/staging/LiveOS/squashfs.img"
+
 }
 
 function boot_menu_grub(){
