@@ -5,6 +5,7 @@
 # TODO: create
 # TODO: better error handler with output
 # TODO: fix comp option (or disable it, lol)
+# TODO: make executables (mkfs.vfat) have absolute paths (for suse)
 
 #!/bin/bash
 
