@@ -26,18 +26,53 @@ trap "failure_cleanup" 1 2 3 6
 trap "failure_cleanup" ERR
 
 function main(){
-	while getopts "hvd:o:c:" option; do
-	#while getopts ":h" option; do
-		case $option in
-			h) greeter_help
-				exit;;
-			v) verbosity=1;;
-			d) chroot_dir=$(realpath $OPTARG)
-				arg_mode=1;;
-			o) output_iso=$(realpath $OPTARG)
-				arg_mode=1;;
-			c) comp_algo=$OPTARG;;
-			\?) greeter_help;;
+	while :; do
+		case $1 in
+			-h | --help)
+				greeter_help
+				exit 0;;
+			-v | --verbose) 
+				verbosity=1
+				v_keya="-v"
+				set -o xtrace
+				shift
+				;;
+			-d | --directory) 
+				chroot_dir=$(realpath $2)
+				arg_mode=1
+				shift
+				;;
+			-o | --output) 
+				output_iso=$(realpath $2)
+				arg_mode=1
+				shift
+				;;
+			-c | --comp) 
+				echo "warning: option "$1" doesnt do anything"
+				comp_algo=$OPTARG
+				shift
+				;;
+			--) # end of all options
+				shift
+				break
+				;;
+			-*) # invalid option
+				printf >&2 "ERROR: Invalid flag '%s'\n\n" "$1"
+				greeter_help
+				exit 1
+				;;
+			*) # when there are no more options
+				if [ -n "$1" ]; then
+				chroot_dir=$(realpath $1)
+				output_iso=$(realpath $2)
+					if [ ! -z "$3" ]; then
+						echo "dont use third arg" # debug
+						show_help
+						exit 1
+					fi
+					break
+				fi
+				break
 		esac
 	done
 
@@ -134,15 +169,6 @@ function check_privileges() {
 }
 
 ### the core functionality begins here
-
-
-
-function init_flags(){
-	if [ ${verbosity} == 1 ]; then
-	v_keya="-v"
-	#echo "$v_keya" # debug
-	fi
-}
 
 function check_chroot(){
 	if [ ! -e ${chroot_dir}/bin/sh ] || [ ! -e ${chroot_dir}/boot/vmlinuz ]; then
