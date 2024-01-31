@@ -232,13 +232,13 @@ set timeout=30
 
 menuentry "Linux Live [EFI/GRUB]" {
     search --no-floppy --set=root --label DEBLIVE
-    linux ($root)/live/vmlinuz boot=live
+    linux ($root)/live/vmlinuz boot=live root=live:CDLABEL=DEBLIVE rd.live.image rd.live.dir=/live rd.live.squashimg=filesystem.squashfs
     initrd ($root)/live/initrd.img
 }
 
 menuentry "Linux Live [EFI/GRUB] (nomodeset)" {
     search --no-floppy --set=root --label DEBLIVE
-    linux ($root)/live/vmlinuz boot=live nomodeset
+    linux ($root)/live/vmlinuz nomodeset boot=live root=live:CDLABEL=DEBLIVE rd.live.image rd.live.dir=/live rd.live.squashimg=filesystem.squashfs
     initrd ($root)/live/initrd.img
 }
 EOF
