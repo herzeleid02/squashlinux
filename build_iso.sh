@@ -21,6 +21,7 @@ comp_algo="gzip" # gzip should be default (can be zstd:15)
 comp_level="" # not implemented yet
 comp_command="" #
 grub_make_command="grub-mkstandalone" # can also be "grub2_mkstandalone"
+cleanup_mode=0 # it should be 1 but its 0 for now
 
 trap "failure_cleanup" 1 2 3 6
 trap "failure_cleanup" ERR
@@ -38,18 +39,26 @@ function main(){
 				shift
 				;;
 			-d | --directory) 
-				chroot_dir=$(realpath $2)
-				arg_mode=1
-				shift
+				if [ -n "$2" ]; then
+					chroot_dir=$(realpath $2)
+					shift
+					shift
+				fi
 				;;
 			-o | --output) 
-				output_iso=$(realpath $2)
-				arg_mode=1
-				shift
+				if [ -n "$2" ]; then
+					output_iso=$(realpath $2)
+					shift
+					shift
+				fi
 				;;
-			-c | --comp) 
+			-c | --comp) # dont use it its broken
 				echo "warning: option "$1" doesnt do anything"
 				comp_algo=$OPTARG
+				shift
+				;;
+			--no-cleanup) # no cleanup if something happens
+				cleanup_mode=0
 				shift
 				;;
 			--) # end of all options
@@ -76,17 +85,7 @@ function main(){
 		esac
 	done
 
-
-	if [ $OPTIND -eq 1 ]; then
-		#echo "no options" # debug
-		assign_args "$@"
-	elif [ $1 = "-v" ] && [ ${arg_mode} == 0 ]; then
-		shift 1
-		assign_args "$@"
-	fi
-	arg_parser "$@"
-
-	init_flags
+	#init_flags
 	check_chroot
 	check_privileges
 	check_dependencies
@@ -104,6 +103,7 @@ function main(){
 
 }
 
+# TODO: removal of this
 function arg_parser(){
 	if [ -z ${chroot_dir} ] || [ -z ${output_iso} ]; then
 		greeter_help
@@ -151,8 +151,10 @@ function parse_comp(){
 }
 
 function make_cleanup(){
-	umount ${v_keya} -f ${build_root}/chroot
-	rm ${v_keya} -rf ${build_root}
+	if [ ${cleanup_mode} != "0" ]; then
+		umount ${v_keya} -f ${build_root}/chroot
+		rm ${v_keya} -rf ${build_root}
+	fi
 }
 
 function failure_cleanup(){
