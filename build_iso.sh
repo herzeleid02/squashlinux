@@ -22,6 +22,7 @@ comp_level="" # not implemented yet
 comp_command="" #
 grub_make_command="grub-mkstandalone" # can also be "grub2_mkstandalone"
 cleanup_mode=0 # it should be 1 but its 0 for now
+suse_mode=0 # suse has grub files stored in other directories
 
 trap "failure_cleanup" 1 2 3 6
 trap "failure_cleanup" ERR
@@ -287,14 +288,14 @@ EOF
 }
 
 function boot_install_grub(){
-	# TODO: remove i386(?)
-	${grub_make_command} -O i386-efi \
-    --modules="linux search part_gpt part_msdos fat iso9660" \
-    --locales="" \
-    --themes="" \
-    --fonts="" \
-    --output="${build_root}/staging/EFI/BOOT/BOOTIA32.EFI" \
-    "boot/grub/grub.cfg=${build_root}/tmp/grub-embed.cfg"
+	## TODO: remove i386(?)
+	#${grub_make_command} -O i386-efi \
+    #--modules="linux search part_gpt part_msdos fat iso9660" \
+    #--locales="" \
+    #--themes="" \
+    #--fonts="" \
+    #--output="${build_root}/staging/EFI/BOOT/BOOTIA32.EFI" \
+    #"boot/grub/grub.cfg=${build_root}/tmp/grub-embed.cfg"
 	${grub_make_command} -O x86_64-efi \
     --modules="linux search part_gpt part_msdos fat iso9660" \
     --locales="" \
@@ -309,7 +310,7 @@ function boot_install_grub(){
     mkfs.vfat efiboot.img && \
     mmd -i efiboot.img ::/EFI ::/EFI/BOOT && \
     mcopy -vi efiboot.img \
-        "${build_root}/staging/EFI/BOOT/BOOTIA32.EFI" \
+        #"${build_root}/staging/EFI/BOOT/BOOTIA32.EFI" \
         "${build_root}/staging/EFI/BOOT/BOOTx64.EFI" \
         "${build_root}/staging/boot/grub/grub.cfg" \
         ::/EFI/BOOT/
