@@ -23,6 +23,7 @@ comp_command="" #
 grub_make_command="grub-mkstandalone" # can also be "grub2_mkstandalone"
 cleanup_mode=0 # it should be 1 but its 0 for now
 suse_mode=0 # suse has grub files stored in other directories
+grub_files_directory="/usr/lib/grub/" # check suse mode
 
 trap "failure_cleanup" 1 2 3 6
 trap "failure_cleanup" ERR
@@ -87,6 +88,7 @@ function main(){
 	done
 
 	#init_flags
+	check_grub_files
 	check_chroot
 	check_privileges
 	check_dependencies
@@ -181,6 +183,7 @@ function check_chroot(){
 }
 
 function check_dependencies(){
+	# TODO add mmd
 	if [ ! -x "$(command -v xorriso)" ] || [ ! -x "$(command -v mksquashfs)" ]; then
 	echo "No xorriso or mksquashfs found, aborting..."
 	exit 1
@@ -195,6 +198,15 @@ function check_grub_make_command(){
 	else
 		echo "No "grub-mkstandalone" or "grub2-mkstandalone" found, aborting..."
 		exit 1
+	fi
+}
+
+# function to check grub file locations
+function check_grub_files(){
+	# i should probably make a loop check but whatever
+	if [ ! -d ${grub_files_directory} ]; then
+		suse_mode=1
+		grub_files_directory="/usr/share/grub2/"
 	fi
 }
 
