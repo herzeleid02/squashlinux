@@ -23,7 +23,7 @@ comp_command="" #
 grub_make_command="grub-mkstandalone" # can also be "grub2_mkstandalone"
 cleanup_mode=0 # it should be 1 but its 0 for now
 suse_mode=0 # suse has grub files stored in other directories
-grub_files_directory="/usr/lib/grub/" # check suse mode
+grub_files_directory="/usr/lib/grub" # check suse mode
 
 trap "failure_cleanup" 1 2 3 6
 trap "failure_cleanup" ERR
@@ -206,7 +206,7 @@ function check_grub_files(){
 	# i should probably make a loop check but whatever
 	if [ ! -d ${grub_files_directory} ]; then
 		suse_mode=1
-		grub_files_directory="/usr/share/grub2/"
+		grub_files_directory="/usr/share/grub2"
 	fi
 }
 
@@ -301,6 +301,7 @@ EOF
 
 function boot_install_grub(){
 	## TODO: remove i386(?)
+	## TODO: make a switch
 	#${grub_make_command} -O i386-efi \
     #--modules="linux search part_gpt part_msdos fat iso9660" \
     #--locales="" \
@@ -339,7 +340,7 @@ function boot_install_grub(){
     "boot/grub/grub.cfg=${build_root}/staging/boot/grub/grub.cfg"
 
 cat \
-    /usr/lib/grub/i386-pc/cdboot.img \
+    ${grub_files_directory}/i386-pc/cdboot.img \
     ${build_root}/staging/grub-bios-core.img \
 > ${build_root}/staging/bios.img 
 	rm ${v_keya} "${build_root}/staging/grub-bios-core.img"
@@ -358,7 +359,7 @@ function create_iso(){
         -boot-info-table \
         --eltorito-catalog boot/grub/boot.cat \
     --grub2-boot-info \
-    --grub2-mbr /usr/lib/grub/i386-pc/boot_hybrid.img \
+    --grub2-mbr ${grub_files_directory}/i386-pc/boot_hybrid.img \
     -eltorito-alt-boot \
         -e EFI/efiboot.img \
         -no-emul-boot \
