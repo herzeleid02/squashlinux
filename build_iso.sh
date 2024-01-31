@@ -11,6 +11,8 @@
 
 set -o errtrace
 
+PATH="$PATH:/sbin:/usr/sbin:/usr/local/sbin:/root/bin:/usr/local/bin:/usr/bin:/bin" # shouldnt be really neccessary, but suse with podman unshare wants absolute program paths and i dont like it
+
 build_root="/tmp/iso-$(date +%d%m%Y)-$(tr -dc a-z </dev/urandom | head -c 4)"
 chroot_dir=""
 output_iso=""
@@ -323,10 +325,10 @@ function boot_install_grub(){
     mkfs.vfat efiboot.img && \
     mmd -i efiboot.img ::/EFI ::/EFI/BOOT && \
     mcopy -vi efiboot.img \
-        #"${build_root}/staging/EFI/BOOT/BOOTIA32.EFI" \
         "${build_root}/staging/EFI/BOOT/BOOTx64.EFI" \
         "${build_root}/staging/boot/grub/grub.cfg" \
         ::/EFI/BOOT/
+        #"${build_root}/staging/EFI/BOOT/BOOTIA32.EFI" \
 )
 
 	# grub bios
