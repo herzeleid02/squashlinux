@@ -26,6 +26,8 @@ grub_make_command="grub-mkstandalone" # can also be "grub2_mkstandalone"
 cleanup_mode=0 # it should be 1 but its 0 for now
 suse_mode=0 # suse has grub files stored in other directories
 grub_files_directory="/usr/lib/grub" # check suse mode
+grub_ia32_install=0 # if 1, also install grub2 i386-efi
+mcopy_string="${build_root}/staging/EFI/BOOT/BOOTx64.EFI" # check grub install thing
 
 trap "failure_cleanup" 1 2 3 6
 trap "failure_cleanup" ERR
@@ -63,6 +65,11 @@ function main(){
 				;;
 			--no-cleanup) # no cleanup if something happens
 				cleanup_mode=0
+				shift
+				;;
+			--old-efi) #
+				grub_ia32_install=1
+				echo "warning: grub2 i386-efi setup might not work"
 				shift
 				;;
 			--) # end of all options
@@ -302,15 +309,25 @@ EOF
 }
 
 function boot_install_grub(){
-	## TODO: remove i386(?)
-	## TODO: make a switch
-	#${grub_make_command} -O i386-efi \
-    #--modules="linux search part_gpt part_msdos fat iso9660" \
-    #--locales="" \
-    #--themes="" \
-    #--fonts="" \
-    #--output="${build_root}/staging/EFI/BOOT/BOOTIA32.EFI" \
-    #"boot/grub/grub.cfg=${build_root}/tmp/grub-embed.cfg"
+	echo $grub_ia32_install # debug
+	echo "####################" # debug
+	echo ${mcopy_string} # debug
+
+	# ia32 check and define
+	if [ ${grub_ia32_install} != 0 ]; then 
+		${grub_make_command} -O i386-efi \
+    		--modules="linux search part_gpt part_msdos fat iso9660" \
+    		--locales="" \
+    		--themes="" \
+    		--fonts="" \
+    		--output="${build_root}/staging/EFI/BOOT/BOOTIA32.EFI" \
+    		"boot/grub/grub.cfg=${build_root}/tmp/grub-embed.cfg"
+
+		# define the BOOTIA32.EFI string latter in script
+		# could have appended to the original string, but whatever
+		mcopy_string="${build_root}/staging/EFI/BOOT/BOOTIA32.EFI ${build_root}/staging/EFI/BOOT/BOOTx64.EFI"
+	fi
+
 	${grub_make_command} -O x86_64-efi \
     --modules="linux search part_gpt part_msdos fat iso9660" \
     --locales="" \
@@ -325,7 +342,7 @@ function boot_install_grub(){
     mkfs.vfat efiboot.img && \
     mmd -i efiboot.img ::/EFI ::/EFI/BOOT && \
     mcopy -vi efiboot.img \
-        "${build_root}/staging/EFI/BOOT/BOOTx64.EFI" \
+    	${mcopy_string} \
         "${build_root}/staging/boot/grub/grub.cfg" \
         ::/EFI/BOOT/
         #"${build_root}/staging/EFI/BOOT/BOOTIA32.EFI" \
