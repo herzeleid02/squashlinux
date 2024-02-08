@@ -164,8 +164,8 @@ function parse_comp(){
 
 function make_cleanup(){
 	if [ ${cleanup_mode} != "0" ]; then
-		umount ${v_keya} -f ${build_root}/chroot
-		rm ${v_keya} -rf ${build_root}
+		# made it so it wont nuke the container :) if the mount was unsuccesful
+		umount ${v_keya} -f ${build_root}/chroot && rm ${v_keya} -rf ${build_root}
 	fi
 }
 
