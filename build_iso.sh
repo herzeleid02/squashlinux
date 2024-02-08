@@ -165,7 +165,8 @@ function parse_comp(){
 function make_cleanup(){
 	if [ ${cleanup_mode} != "0" ]; then
 		# made it so it wont nuke the container :) if the mount was unsuccesful
-		umount ${v_keya} -f ${build_root}/chroot && rm ${v_keya} -rf ${build_root}
+		# then i placed || hack for podman umount fix
+	umount ${v_keya} ${build_root}/chroot || umount ${v_keya} -f ${build_root}/chroot && rm ${v_keya} -rf ${build_root}
 	fi
 }
 
