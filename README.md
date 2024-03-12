@@ -21,6 +21,8 @@ This repository contains many POSIX `sh` compatible (not yet) utilities for boot
 
 Most of the utilities here can be used independently as well as a part of a bigger script. This README.md also contains information about some parts of manual setup.
 
+**NOTE:** Some parts of the project (the container way fo building the image) might and might not be superseded by other projects like [bootc](https://github.com/containers/bootc).
+
 ### `build_iso.sh`
 Script copies all the necessary bootloader files from the chroot directory, squashes the chrootable directory and then appends all the components together into one single bootable `.iso` image.
 
