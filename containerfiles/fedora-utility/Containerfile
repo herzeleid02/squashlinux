@@ -1,0 +1,44 @@
+FROM fedora:latest
+ARG newuser="user"
+
+LABEL description="custom fedora live usb image with installed utilities"
+
+# dnf config
+COPY ./dnf.conf /etc/dnf/dnf.conf
+
+# initial dnf run with system utilities
+RUN dnf install -y ncurses passwd man less sudo openssh rsync zstd file lvm2 btrfs-progs cryptsetup
+RUN dnf upgrade --refresh -y
+
+# networkmanager
+RUN dnf install -y 'NetworkManager-*'
+
+# dnf run with utilities
+RUN dnf install -y ddrescue scrub testdisk nmap vim neovim fish
+
+# user creation
+RUN adduser -m user
+
+# sudo setup
+# source
+# https://superuser.com/a/1491776
+RUN \
+    sed -i /etc/sudoers -re 's/^%sudo.*/%sudo ALL=(ALL:ALL) NOPASSWD: ALL/g' && \
+    sed -i /etc/sudoers -re 's/^root.*/root ALL=(ALL:ALL) NOPASSWD: ALL/g' && \
+    sed -i /etc/sudoers -re 's/^#includedir.*/## **Removed the include directive** ##"/g' && \
+    echo "${newuser} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
+    echo "Customized the sudoers file for passwordless access to the ${newuser} user!" && \
+    echo "${newuser} user:";  su - ${newuser} -c id
+
+# kernel stuff :)
+RUN \
+	dnf install -y kernel kernel-modules kernel-modules-core kernel-modules-internal kernel-modules-extra systemd && dnf install -y squashfs-tools squashfs-tools-ng && dnf install -y dracut-live 
+
+RUN \
+	echo 'add_dracutmodules+="dmsquash-live livenet dmsquash-live dmsquash-live-autooverlay dmsquash-live-ntfs"' > /usr/lib/dracut/dracut.conf.d/11-livenet.conf
+
+
+# idk if curl thing is better or not so i just copy it
+COPY ./fedora-dracut-patch.sh /tmp/
+RUN chmod +x /tmp/fedora-dracut-patch.sh && /tmp/fedora-dracut-patch.sh # could have been better
+
