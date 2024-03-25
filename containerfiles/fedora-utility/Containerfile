@@ -39,6 +39,5 @@ RUN \
 
 
 # idk if curl thing is better or not so i just copy it
-COPY ./fedora-dracut-patch.sh /tmp/
-RUN chmod +x /tmp/fedora-dracut-patch.sh && /tmp/fedora-dracut-patch.sh # could have been better
-
+RUN \
+	curl https://raw.githubusercontent.com/herzeleid02/squashlinux/master/scripts/fedora-dracut-patch.sh | sh
