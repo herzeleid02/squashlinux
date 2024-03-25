@@ -7,7 +7,7 @@ LABEL description="custom fedora live usb image with installed utilities"
 COPY ./dnf.conf /etc/dnf/dnf.conf
 
 # initial dnf run with system utilities
-RUN dnf install -y ncurses passwd man less sudo openssh rsync zstd file lvm2 btrfs-progs cryptsetup
+RUN dnf install -y ncurses passwd man less sudo openssh rsync zstd file lvm2 btrfs-progs cryptsetup nvme-cli smartmontools
 RUN dnf upgrade --refresh -y
 
 # networkmanager
@@ -17,7 +17,8 @@ RUN dnf install -y 'NetworkManager-*'
 RUN dnf install -y ddrescue scrub testdisk nmap vim neovim fish
 
 # user creation
-RUN adduser -m user
+RUN adduser -m ${newuser}
+RUN passwd -d ${newuser}
 
 # sudo setup
 # source
@@ -30,13 +31,13 @@ RUN \
     echo "Customized the sudoers file for passwordless access to the ${newuser} user!" && \
     echo "${newuser} user:";  su - ${newuser} -c id
 
+# install and set up gnome 0_o
+RUN dnf groupinstall -y workstation-product-environment
+RUN dnf remove -y "selinux-*"
+
 # kernel stuff :)
 RUN \
 	dnf install -y kernel kernel-modules kernel-modules-core kernel-modules-internal kernel-modules-extra systemd && dnf install -y squashfs-tools squashfs-tools-ng && dnf install -y dracut-live 
-
-RUN \
-	echo 'add_dracutmodules+="dmsquash-live livenet dmsquash-live dmsquash-live-autooverlay dmsquash-live-ntfs"' > /usr/lib/dracut/dracut.conf.d/11-livenet.conf
-
 
 # idk if curl thing is better or not so i just copy it
 RUN \
